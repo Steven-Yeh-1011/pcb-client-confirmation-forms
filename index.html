@@ -37,26 +37,44 @@
     .badge { display: inline-block; font-size: 0.7rem; font-weight: 600; padding: 3px 8px; border-radius: 6px; margin-bottom: 8px; }
     .badge.full { background: #dbeafe; color: #1e40af; }
     .badge.simple { background: #dcfce7; color: #166534; }
-    footer { margin-top: 28px; font-size: 0.75rem; opacity: 0.65; }
+    .notice {
+      margin-top: 28px;
+      text-align: left;
+      font-size: 0.78rem;
+      line-height: 1.55;
+      opacity: 0.92;
+      padding: 14px 16px;
+      border-radius: 10px;
+      background: rgba(254, 243, 199, 0.12);
+      border: 1px solid rgba(253, 224, 71, 0.35);
+      color: #fef9c3;
+    }
+    .notice strong { display: block; font-size: 0.72rem; letter-spacing: 0.06em; margin-bottom: 8px; opacity: 0.95; }
+    .notice p { margin-bottom: 10px; }
+    .notice p:last-child { margin-bottom: 0; }
   </style>
 </head>
 <body>
   <div class="wrap">
     <h1>控制板專案 — 需求確認</h1>
-    <p class="sub">請依需求選擇表單版本填寫。建議多數客戶先使用簡易版；細節較多時請用完整版。</p>
+    <p class="sub">請盡量填寫<strong style="opacity:1;font-weight:700">完整版</strong>；若貴司暫無工程師協助細填，可改填<strong style="opacity:1;font-weight:700">簡易版</strong>。</p>
     <div class="cards">
-      <a class="card" href="./form-simple.html">
-        <span class="badge simple">簡易版</span>
-        <strong>客戶端確認表單（簡易版）</strong>
-        <span>步驟較少、填寫較快，適合先釐清大方向。</span>
-      </a>
       <a class="card" href="./form-full.html">
         <span class="badge full">完整版</span>
         <strong>客戶端確認表單（完整版）</strong>
-        <span>含較多技術與規格欄位，適合已明確規格或需逐項確認時使用。</span>
+        <span>含較多技術與規格欄位，便於我們精準評估與報價。</span>
+      </a>
+      <a class="card" href="./form-simple.html">
+        <span class="badge simple">簡易版</span>
+        <strong>客戶端確認表單（簡易版）</strong>
+        <span>步驟較少、填寫較快，適合先建立共識或補齊資訊前使用。</span>
       </a>
     </div>
-    <footer>若連結無法開啟，請確認網址是否完整複製。</footer>
+    <div class="notice" role="note">
+      <strong>說明（成品與報價）</strong>
+      <p><strong>完整版：</strong>欄位填寫越完整，我們越能對應規格、風險與工時做具體評估，<strong>報價與交付範圍（成品定義）</strong>通常可一次說明得較明確。</p>
+      <p><strong>簡易版：</strong>以可取得的概況為主，我們仍會給出方向與參考；若關鍵規格不足，<strong>報價可能為區間或附條件</strong>，成品細節須待補件或後續討論後再定案。</p>
+    </div>
   </div>
 </body>
 </html>
