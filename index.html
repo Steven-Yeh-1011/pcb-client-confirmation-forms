@@ -1,80 +1,526 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>控制板專案 — 客戶需求確認</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft JhengHei", sans-serif;
-      min-height: 100vh;
-      background: linear-gradient(160deg, #0f172a 0%, #1e3a5f 45%, #2563eb 100%);
-      color: #f8fafc;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-    }
-    .wrap { max-width: 420px; width: 100%; text-align: center; }
-    h1 { font-size: 1.35rem; font-weight: 700; line-height: 1.35; margin-bottom: 8px; }
-    p.sub { font-size: 0.9rem; opacity: 0.85; margin-bottom: 28px; line-height: 1.5; }
-    .cards { display: flex; flex-direction: column; gap: 14px; }
-    a.card {
-      display: block;
-      text-decoration: none;
-      color: inherit;
-      background: rgba(255,255,255,0.12);
-      border: 1px solid rgba(255,255,255,0.2);
-      border-radius: 14px;
-      padding: 20px 22px;
-      text-align: left;
-      transition: background 0.2s, transform 0.15s;
-    }
-    a.card:hover { background: rgba(255,255,255,0.18); transform: translateY(-2px); }
-    a.card strong { display: block; font-size: 1.05rem; margin-bottom: 6px; }
-    a.card span { font-size: 0.82rem; opacity: 0.88; line-height: 1.45; }
-    .badge { display: inline-block; font-size: 0.7rem; font-weight: 600; padding: 3px 8px; border-radius: 6px; margin-bottom: 8px; }
-    .badge.full { background: #dbeafe; color: #1e40af; }
-    .badge.simple { background: #dcfce7; color: #166534; }
-    .notice {
-      margin-top: 28px;
-      text-align: left;
-      font-size: 0.78rem;
-      line-height: 1.55;
-      opacity: 0.92;
-      padding: 14px 16px;
-      border-radius: 10px;
-      background: rgba(254, 243, 199, 0.12);
-      border: 1px solid rgba(253, 224, 71, 0.35);
-      color: #fef9c3;
-    }
-    .notice strong { display: block; font-size: 0.72rem; letter-spacing: 0.06em; margin-bottom: 8px; opacity: 0.95; }
-    .notice p { margin-bottom: 10px; }
-    .notice p:last-child { margin-bottom: 0; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>電壓偵測式自動卸電控制板 — 需求確認</title>
+<style>
+  :root {
+    --primary: #2563eb;
+    --primary-light: #dbeafe;
+    --success: #16a34a;
+    --success-light: #dcfce7;
+    --warning: #f59e0b;
+    --warning-light: #fef3c7;
+    --gray-50: #f9fafb;
+    --gray-100: #f3f4f6;
+    --gray-200: #e5e7eb;
+    --gray-400: #9ca3af;
+    --gray-600: #4b5563;
+    --gray-800: #1f2937;
+    --line-green: #06c755;
+    --radius: 14px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft JhengHei", sans-serif;
+    background: var(--gray-100);
+    color: var(--gray-800);
+    line-height: 1.6;
+    padding-bottom: 120px;
+    -webkit-text-size-adjust: 100%;
+  }
+  .header {
+    background: linear-gradient(135deg, #1e40af, #3b82f6);
+    color: white;
+    padding: 24px 20px 20px;
+    text-align: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+  }
+  .header h1 { font-size: 19px; font-weight: 700; line-height: 1.35; }
+  .header p { font-size: 13px; opacity: 0.88; margin-top: 8px; line-height: 1.5; }
+
+  .container { max-width: 500px; margin: 0 auto; padding: 16px; }
+
+  .card {
+    background: white;
+    border-radius: var(--radius);
+    padding: 22px 20px;
+    margin-bottom: 14px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+
+  .q-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: white;
+    font-size: 14px;
+    font-weight: 700;
+    margin-right: 8px;
+    flex-shrink: 0;
+  }
+  .q-title {
+    font-size: 17px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    margin-bottom: 6px;
+  }
+  .q-hint {
+    font-size: 13px;
+    color: var(--gray-600);
+    margin-bottom: 14px;
+    padding-left: 36px;
+  }
+
+  .option-group { display: flex; flex-direction: column; gap: 10px; }
+  .option-btn {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px;
+    border: 2px solid var(--gray-200);
+    border-radius: 12px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+    font-size: 15px;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .option-btn:active { transform: scale(0.98); }
+  .option-btn.selected { border-color: var(--primary); background: var(--primary-light); }
+  .option-icon { font-size: 26px; flex-shrink: 0; }
+  .option-text { flex: 1; }
+  .option-text strong { display: block; font-size: 15px; }
+  .option-text span { font-size: 13px; color: var(--gray-600); }
+  .option-btn.selected .option-text span { color: #1e40af; }
+  .option-check {
+    width: 24px; height: 24px; min-width: 24px;
+    border-radius: 50%;
+    border: 2px solid var(--gray-400);
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+  .option-btn.selected .option-check {
+    border-color: var(--primary);
+    background: var(--primary);
+  }
+  .option-btn.selected .option-check::after {
+    content: '✓';
+    color: white;
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  .input-group { margin-bottom: 16px; }
+  .input-group:last-child { margin-bottom: 0; }
+  .input-label {
+    display: block;
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  input[type="text"], textarea, select {
+    width: 100%;
+    padding: 14px;
+    border: 2px solid var(--gray-200);
+    border-radius: 10px;
+    font-size: 16px;
+    font-family: inherit;
+    transition: border-color 0.2s;
+    -webkit-appearance: none;
+    background: white;
+  }
+  input:focus, textarea:focus, select:focus {
+    outline: none;
+    border-color: var(--primary);
+  }
+  textarea { resize: vertical; min-height: 120px; }
+
+  .photo-hint {
+    background: var(--warning-light);
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-size: 13px;
+    color: #92400e;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .photo-hint .icon { font-size: 20px; flex-shrink: 0; }
+
+  .btn-row { display: flex; gap: 10px; margin-top: 8px; }
+  .btn {
+    flex: 1;
+    padding: 16px;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn-primary { background: var(--primary); color: white; }
+
+  .result-box {
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    border-radius: 10px;
+    padding: 16px;
+    font-size: 13px;
+    line-height: 1.9;
+    white-space: pre-wrap;
+    word-break: break-all;
+    max-height: 360px;
+    overflow-y: auto;
+    margin-bottom: 16px;
+  }
+
+  .toast {
+    position: fixed;
+    bottom: 90px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--gray-800);
+    color: white;
+    padding: 14px 28px;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    opacity: 0;
+    transition: all 0.3s;
+    z-index: 200;
+    pointer-events: none;
+    max-width: 90vw;
+    text-align: center;
+    white-space: normal;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .line-logo-svg { width: 22px; height: 22px; fill: white; }
+
+  .send-section { text-align: center; padding: 10px 0; }
+  .send-section p { font-size: 13px; color: var(--gray-600); margin-bottom: 14px; }
+
+  .done-check {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: var(--success-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+    font-size: 32px;
+  }
+
+  .btn-line {
+    background: var(--line-green);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 17px;
+  }
+  .btn-copy {
+    background: white;
+    color: var(--gray-800);
+    border: 2px solid var(--gray-200);
+  }
+</style>
 </head>
 <body>
-  <div class="wrap">
-    <h1>控制板專案 — 需求確認</h1>
-    <p class="sub">請盡量填寫<strong style="opacity:1;font-weight:700">完整版</strong>；若貴司暫無工程師協助細填，可改填<strong style="opacity:1;font-weight:700">簡易版</strong>。</p>
-    <div class="cards">
-      <a class="card" href="./form-full.html">
-        <span class="badge full">完整版</span>
-        <strong>客戶端確認表單（完整版）</strong>
-        <span>含較多技術與規格欄位，便於我們精準評估與報價。</span>
-      </a>
-      <a class="card" href="./form-simple.html">
-        <span class="badge simple">簡易版</span>
-        <strong>客戶端確認表單（簡易版）</strong>
-        <span>步驟較少、填寫較快，適合先建立共識或補齊資訊前使用。</span>
-      </a>
-    </div>
-    <div class="notice" role="note">
-      <strong>說明（成品與報價）</strong>
-      <p><strong>完整版：</strong>欄位填寫越完整，我們越能對應規格、風險與工時做具體評估，<strong>報價與交付範圍（成品定義）</strong>通常可一次說明得較明確。</p>
-      <p><strong>簡易版：</strong>以可取得的概況為主，我們仍會給出方向與參考；若關鍵規格不足，<strong>報價可能為區間或附條件</strong>，成品細節須待補件或後續討論後再定案。</p>
+
+<div class="header">
+  <h1>電壓偵測式自動卸電控制板</h1>
+  <p>需求確認（單頁填寫）— 請完成下列 4 題；其餘請寫於備註，填畢後送出即可傳給我們</p>
+</div>
+
+<div class="container">
+
+  <div class="card">
+    <div class="q-title"><span class="q-number">1</span> 您需要我們做到什麼程度？</div>
+    <div class="q-hint">確認製作範圍，方便我們報價</div>
+    <div class="option-group" id="q_scope">
+      <button type="button" class="option-btn" data-value="只做控制板（客戶自行裝回控制箱）" onclick="sel(this)">
+        <div class="option-icon">🔧</div>
+        <div class="option-text">
+          <strong>只做控制板</strong>
+          <span>我們交付成品板，貴司自行裝回控制箱</span>
+        </div>
+        <div class="option-check"></div>
+      </button>
+      <button type="button" class="option-btn" data-value="控制板＋控制箱整組（可直接安裝上電）" onclick="sel(this)">
+        <div class="option-icon">📦</div>
+        <div class="option-text">
+          <strong>控制板 + 控制箱整組</strong>
+          <span>我們整組做好交付，貴司直接安裝上電</span>
+        </div>
+        <div class="option-check"></div>
+      </button>
+      <button type="button" class="option-btn" data-value="不確定，需要你們評估建議" onclick="sel(this)">
+        <div class="option-icon">💬</div>
+        <div class="option-text">
+          <strong>不確定</strong>
+          <span>需要你們評估後建議</span>
+        </div>
+        <div class="option-check"></div>
+      </button>
     </div>
   </div>
+
+  <div class="card">
+    <div class="q-title"><span class="q-number">2</span> 您有原本的板子可以提供嗎？</div>
+    <div class="q-hint">有實體板可以大幅縮短時間與成本</div>
+    <div class="option-group" id="q_board">
+      <button type="button" class="option-btn" data-value="有，可以寄給你們拆解研究" onclick="sel(this)">
+        <div class="option-icon">✅</div>
+        <div class="option-text">
+          <strong>有，可以拆解研究</strong>
+          <span>我們會仔細分析後複製</span>
+        </div>
+        <div class="option-check"></div>
+      </button>
+      <button type="button" class="option-btn" data-value="有，但只能借看不能拆" onclick="sel(this)">
+        <div class="option-icon">👀</div>
+        <div class="option-text">
+          <strong>有，但不能拆</strong>
+          <span>我們用非破壞方式分析，會比較久</span>
+        </div>
+        <div class="option-check"></div>
+      </button>
+      <button type="button" class="option-btn" data-value="沒有原板，只有照片" onclick="sel(this)">
+        <div class="option-icon">📷</div>
+        <div class="option-text">
+          <strong>沒有，只有照片</strong>
+          <span>可行但難度較高，需要更多資訊</span>
+        </div>
+        <div class="option-check"></div>
+      </button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="q-title"><span class="q-number">3</span> 這塊板子目前的狀況？</div>
+    <div class="q-hint">影響我們能不能直接從原板複製程式</div>
+    <div class="option-group" id="q_status">
+      <button type="button" class="option-btn" data-value="還能正常運作" onclick="sel(this)">
+        <div class="option-icon">🟢</div>
+        <div class="option-text">
+          <strong>還能正常運作</strong>
+          <span>只是想多做備品 / 替換老化零件</span>
+        </div>
+        <div class="option-check"></div>
+      </button>
+      <button type="button" class="option-btn" data-value="已故障無法使用" onclick="sel(this)">
+        <div class="option-icon">🔴</div>
+        <div class="option-text">
+          <strong>已故障，無法使用</strong>
+          <span>需要盡快替換</span>
+        </div>
+        <div class="option-check"></div>
+      </button>
+      <button type="button" class="option-btn" data-value="時好時壞不穩定" onclick="sel(this)">
+        <div class="option-icon">🟡</div>
+        <div class="option-text">
+          <strong>時好時壞</strong>
+          <span>偶爾正常，偶爾異常</span>
+        </div>
+        <div class="option-check"></div>
+      </button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="q-title"><span class="q-number">4</span> 現場的電力規格</div>
+    <div class="q-hint">不確定的話可以看電表或配電箱上的標示</div>
+    <div class="input-group">
+      <label class="input-label" for="q_voltage">現場電壓</label>
+      <select id="q_voltage">
+        <option value="">請選擇</option>
+        <option value="單相 110V">單相 110V（一般家用）</option>
+        <option value="單相 220V">單相 220V</option>
+        <option value="三相 220V">三相 220V（工廠常見）</option>
+        <option value="三相 380V">三相 380V（工廠常見）</option>
+        <option value="不確定">不確定</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="q-title"><span class="q-number" style="background:var(--gray-600)">＋</span> 備註（選填，建議填寫）</div>
+    <div class="q-hint" style="padding-left:36px;">聯絡人／公司、需要幾組、希望交期、板子如何動作、是否配合其他設備等，越清楚越好</div>
+    <div class="input-group">
+      <label class="input-label" for="q_contact">聯絡人／公司名稱</label>
+      <input type="text" id="q_contact" placeholder="方便我們回覆報價">
+    </div>
+    <div class="input-group">
+      <label class="input-label" for="q_notes">其他補充</label>
+      <textarea id="q_notes" rows="5" placeholder="例：需要幾組、多急、上電後板子如何動作、現場照片已傳至…"></textarea>
+    </div>
+  </div>
+
+  <div class="photo-hint">
+    <div class="icon">📸</div>
+    <div>
+      <strong>補充照片</strong>（若尚未提供）<br>
+      ① 板子反面　② 端子台帶線　③ 接觸器銘牌　④ 其他控制器（如有）
+    </div>
+  </div>
+
+  <div id="resultSection" style="display:none">
+    <div class="card">
+      <div class="done-check">✅</div>
+      <div style="text-align:center; margin-bottom:12px;">
+        <strong style="font-size:17px;">填寫完成！</strong><br>
+        <span style="font-size:13px; color:var(--gray-600);">請選擇方式傳送給我們</span>
+      </div>
+      <div class="result-box" id="resultText"></div>
+      <div class="send-section">
+        <button type="button" class="btn btn-line" onclick="sendLine()" style="width:100%; margin-bottom:10px;">
+          <svg class="line-logo-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 5.93 2 10.73c0 4.14 3.33 7.61 7.83 8.56.3.07.72.2.82.47.1.24.06.61.03.86l-.13.78c-.04.24-.19.93.82.51 1-.43 5.42-3.19 7.4-5.46C20.68 14.36 22 12.64 22 10.73 22 5.93 17.52 2 12 2zm-3.2 11.6H6.58a.48.48 0 01-.48-.48V8.56c0-.27.22-.48.48-.48s.48.22.48.48v4.08h1.74c.27 0 .48.22.48.48s-.22.48-.48.48zm1.62-.48a.48.48 0 01-.96 0V8.56a.48.48 0 01.96 0v4.56zm4.32 0a.48.48 0 01-.32.45.48.48 0 01-.53-.13l-2.3-3.13v2.81a.48.48 0 01-.96 0V8.56a.48.48 0 01.85-.3l2.3 3.13V8.56a.48.48 0 01.96 0v4.56zm3.56-3.08a.48.48 0 010 .96H16.6v.88h1.7a.48.48 0 010 .96h-2.18a.48.48 0 01-.48-.48V8.56c0-.27.22-.48.48-.48h2.18a.48.48 0 010 .96H16.6v.88h1.7z"/></svg>
+          傳送到 LINE
+        </button>
+        <button type="button" class="btn btn-copy" onclick="copyText()" style="width:100%;">
+          📋 複製文字（貼到 LINE / 其他通訊軟體）
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="btn-row" id="submitRow">
+    <button type="button" class="btn btn-primary" onclick="submit()">確認送出</button>
+  </div>
+
+</div>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+const data = {};
+
+function sel(btn) {
+  const grp = btn.parentElement;
+  grp.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  data[grp.id] = btn.dataset.value;
+}
+
+function v(id) {
+  const el = document.getElementById(id);
+  if (!el) return '';
+  return el.value.trim();
+}
+
+function submit() {
+  if (!data.q_scope) { showToast('請選擇第 1 題：需要做到什麼程度'); return; }
+  if (!data.q_board) { showToast('請選擇第 2 題：是否有原板可提供'); return; }
+  if (!data.q_status) { showToast('請選擇第 3 題：板子目前狀況'); return; }
+  if (!v('q_voltage')) { showToast('請選擇第 4 題：現場電壓'); document.getElementById('q_voltage').focus(); return; }
+
+  let t = '';
+  t += '══════════════════\n';
+  t += ' 電壓偵測式自動卸電控制板\n';
+  t += ' 需求確認（簡易單頁）\n';
+  t += '══════════════════\n\n';
+
+  if (v('q_contact')) t += '👤 聯絡人：' + v('q_contact') + '\n\n';
+
+  t += '【1 製作範圍】\n' + (data.q_scope || '') + '\n\n';
+  t += '【2 原板】\n' + (data.q_board || '') + '\n\n';
+  t += '【3 板況】\n' + (data.q_status || '') + '\n\n';
+  t += '【4 現場電壓】\n' + v('q_voltage') + '\n';
+
+  if (v('q_notes')) {
+    t += '\n【備註／補充】\n' + v('q_notes') + '\n';
+  }
+
+  t += '\n══════════════════\n';
+  t += '📸 補充照片請另外傳送：\n';
+  t += '  ①板子反面 ②端子台帶線\n';
+  t += '  ③接觸器銘牌 ④其他控制器\n';
+  t += '══════════════════';
+
+  document.getElementById('resultText').textContent = t;
+  document.getElementById('resultSection').style.display = 'block';
+  document.getElementById('submitRow').style.display = 'none';
+
+  setTimeout(() => {
+    document.getElementById('resultSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 200);
+}
+
+function sendLine() {
+  const text = document.getElementById('resultText').textContent;
+  const encoded = encodeURIComponent(text);
+  const ua = navigator.userAgent || '';
+  const isIOS = /iPad|iPhone|iPod/.test(ua);
+  const isAndroid = /Android/.test(ua);
+  const isLINEBrowser = /Line\//i.test(ua);
+
+  if (isLINEBrowser) {
+    window.location.href = 'line://msg/text/' + encoded;
+  } else if (isIOS || isAndroid) {
+    window.location.href = 'line://msg/text/' + encoded;
+    setTimeout(() => {
+      copyText();
+      showToast('如未開啟 LINE，文字已複製，請手動貼上');
+    }, 3000);
+  } else {
+    copyText();
+    showToast('文字已複製，請貼到 LINE 電腦版');
+  }
+}
+
+function copyText() {
+  const text = document.getElementById('resultText').textContent;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(() => {
+      showToast('✅ 已複製！請貼到 LINE 對話');
+    }).catch(() => { fallbackCopy(text); });
+  } else {
+    fallbackCopy(text);
+  }
+}
+
+function fallbackCopy(text) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.left = '-9999px';
+  document.body.appendChild(ta);
+  ta.focus();
+  ta.select();
+  try {
+    document.execCommand('copy');
+    showToast('✅ 已複製！請貼到 LINE 對話');
+  } catch (e) {
+    showToast('複製失敗，請手動長按選取文字');
+  }
+  document.body.removeChild(ta);
+}
+
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 3000);
+}
+</script>
+
 </body>
 </html>
