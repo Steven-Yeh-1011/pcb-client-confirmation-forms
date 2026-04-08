@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>三段式電容器投切控制板 — 需求確認表</title>
+<style>
+  :root {
+    --primary: #2563eb;
+    --primary-light: #dbeafe;
+    --danger: #dc2626;
+    --danger-light: #fee2e2;
+    --success: #16a34a;
+    --success-light: #dcfce7;
+    --warning: #f59e0b;
+    --warning-light: #fef3c7;
+    --gray-50: #f9fafb;
+    --gray-100: #f3f4f6;
+    --gray-200: #e5e7eb;
+    --gray-400: #9ca3af;
+    --gray-600: #4b5563;
+    --gray-800: #1f2937;
+    --radius: 12px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft JhengHei", sans-serif;
+    background: var(--gray-100);
+    color: var(--gray-800);
+    line-height: 1.6;
+    padding-bottom: 100px;
+  }
+
+  .header {
+    background: linear-gradient(135deg, #1e40af, #2563eb);
+    color: white;
+    padding: 24px 20px;
+    text-align: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  }
+  .header h1 { font-size: 18px; font-weight: 700; }
+  .header p { font-size: 13px; opacity: 0.85; margin-top: 4px; }
+
+  .progress-bar {
+    height: 4px;
+    background: rgba(255,255,255,0.3);
+    position: relative;
+  }
+  .progress-bar .fill {
+    height: 100%;
+    background: #60a5fa;
+    transition: width 0.4s ease;
+    border-radius: 2px;
+  }
+
+  .container { max-width: 600px; margin: 0 auto; padding: 16px; }
+
+  .step {
+    display: none;
+    animation: fadeIn 0.3s ease;
+  }
+  .step.active { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .card {
+    background: white;
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+
+  .card-title {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .card-subtitle {
+    font-size: 13px;
+    color: var(--gray-600);
+    margin-bottom: 16px;
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .badge-danger { background: var(--danger-light); color: var(--danger); }
+  .badge-warning { background: var(--warning-light); color: var(--warning); }
+
+  .option-group { display: flex; flex-direction: column; gap: 10px; }
+
+  .option-btn {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 16px;
+    border: 2px solid var(--gray-200);
+    border-radius: 10px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .option-btn:active { transform: scale(0.98); }
+  .option-btn.selected {
+    border-color: var(--primary);
+    background: var(--primary-light);
+  }
+  .option-btn .radio {
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    border-radius: 50%;
+    border: 2px solid var(--gray-400);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1px;
+    transition: all 0.2s;
+  }
+  .option-btn.selected .radio {
+    border-color: var(--primary);
+    background: var(--primary);
+  }
+  .option-btn.selected .radio::after {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: white;
+  }
+  .option-label { font-weight: 600; }
+  .option-desc { font-size: 13px; color: var(--gray-600); margin-top: 2px; }
+
+  .input-group { margin-bottom: 16px; }
+  .input-group:last-child { margin-bottom: 0; }
+
+  .input-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .input-hint {
+    font-size: 12px;
+    color: var(--gray-600);
+    margin-bottom: 6px;
+  }
+
+  input[type="text"], textarea, select {
+    width: 100%;
+    padding: 12px 14px;
+    border: 2px solid var(--gray-200);
+    border-radius: 8px;
+    font-size: 15px;
+    font-family: inherit;
+    transition: border-color 0.2s;
+    -webkit-appearance: none;
+    background: white;
+  }
+  input:focus, textarea:focus, select:focus {
+    outline: none;
+    border-color: var(--primary);
+  }
+  textarea { resize: vertical; min-height: 80px; }
+
+  .btn-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+  }
+
+  .btn {
+    flex: 1;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn-primary { background: var(--primary); color: white; }
+  .btn-primary:disabled { background: var(--gray-400); cursor: not-allowed; }
+  .btn-back { background: var(--gray-200); color: var(--gray-600); flex: 0 0 auto; padding: 14px 20px; }
+  .btn-success { background: var(--success); color: white; }
+  .btn-line { background: #06c755; color: white; }
+
+  .required::after {
+    content: ' *';
+    color: var(--danger);
+  }
+
+  .step-indicator {
+    text-align: center;
+    font-size: 13px;
+    color: var(--gray-400);
+    margin-bottom: 12px;
+  }
+
+  .result-box {
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    border-radius: 8px;
+    padding: 16px;
+    font-size: 13px;
+    line-height: 1.8;
+    white-space: pre-wrap;
+    word-break: break-all;
+    max-height: 400px;
+    overflow-y: auto;
+  }
+
+  .toast {
+    position: fixed;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--gray-800);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    opacity: 0;
+    transition: all 0.3s;
+    z-index: 200;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .divider {
+    height: 1px;
+    background: var(--gray-200);
+    margin: 16px 0;
+  }
+
+  .info-box {
+    background: var(--primary-light);
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-size: 13px;
+    color: #1e40af;
+    margin-bottom: 16px;
+  }
+
+  .warn-box {
+    background: var(--warning-light);
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-size: 13px;
+    color: #92400e;
+    margin-bottom: 16px;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>三段式電容器投切控制板</h1>
+  <p>我們已完成初步判讀，以下幾個問題確認後即可報價</p>
+  <div class="progress-bar"><div class="fill" id="progressFill" style="width:0%"></div></div>
+</div>
+
+<div class="container">
+
+  <!-- ============ STEP 1: 範圍 ============ -->
+  <div class="step active" id="step1">
+    <div class="step-indicator">第 1 步 / 共 4 步 — 確認範圍</div>
+
+    <div class="card">
+      <div class="card-title"><span class="badge badge-danger">必填</span> 硬體範圍</div>
+      <div class="card-subtitle">我們需要做到什麼程度？</div>
+      <div class="option-group" id="q_hardware">
+        <button class="option-btn" data-value="A" onclick="selectOption(this)">
+          <div class="radio"></div>
+          <div>
+            <div class="option-label">A. 只做 PCB 板</div>
+            <div class="option-desc">交付焊好元件的成品板，您自行裝回現有控制箱</div>
+          </div>
+        </button>
+        <button class="option-btn" data-value="B" onclick="selectOption(this)">
+          <div class="radio"></div>
+          <div>
+            <div class="option-label">B. PCB 板 + 控制箱整組</div>
+            <div class="option-desc">交付配線完成、可直接上電使用的控制箱</div>
+          </div>
+        </button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span class="badge badge-danger">必填</span> 韌體範圍</div>
+      <div class="card-subtitle">控制程式怎麼處理？</div>
+      <div class="option-group" id="q_firmware">
+        <button class="option-btn" data-value="甲" onclick="selectOption(this)">
+          <div class="radio"></div>
+          <div>
+            <div class="option-label">甲. 沿用原板程式</div>
+            <div class="option-desc">從原板讀取韌體直接複製（若原板可讀取）</div>
+          </div>
+        </button>
+        <button class="option-btn" data-value="乙" onclick="selectOption(this)">
+          <div class="radio"></div>
+          <div>
+            <div class="option-label">乙. 重新撰寫韌體</div>
+            <div class="option-desc">重新開發控制程式（原板無法讀取、或需改良功能）</div>
+          </div>
+        </button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span class="badge badge-danger">必填</span> 偵測方式</div>
+      <div class="card-subtitle">板子怎麼知道什麼時候該投切？</div>
+      <div class="option-group" id="q_detect">
+        <button class="option-btn" data-value="I" onclick="selectOption(this)">
+          <div class="radio"></div>
+          <div>
+            <div class="option-label">I. 外部信號輸入</div>
+            <div class="option-desc">板子接收外部功因控制器或手動開關的指令</div>
+          </div>
+        </button>
+        <button class="option-btn" data-value="II" onclick="selectOption(this)">
+          <div class="radio"></div>
+          <div>
+            <div class="option-label">II. 板端自行偵測電流</div>
+            <div class="option-desc">板上接 CT 電流互感器，自動偵測功因並投切</div>
+          </div>
+        </button>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="goStep(2)" id="btn_step1">下一步</button>
+    </div>
+  </div>
+
+  <!-- ============ STEP 2: 共通問題 ============ -->
+  <div class="step" id="step2">
+    <div class="step-indicator">第 2 步 / 共 4 步 — 基本規格（所有方案都要填）</div>
+
+    <div class="card">
+      <div class="card-title">硬體 / 電氣</div>
+
+      <div class="input-group">
+        <label class="input-label required">C1. 控制電源電壓</label>
+        <select id="c1">
+          <option value="">請選擇</option>
+          <option value="AC 110V">AC 110V</option>
+          <option value="AC 220V">AC 220V</option>
+          <option value="不確定，需要協助判斷">不確定，需要協助判斷</option>
+        </select>
+      </div>
+
+      <div class="input-group">
+        <label class="input-label required">C2. 接觸器線圈電壓</label>
+        <select id="c2">
+          <option value="">請選擇</option>
+          <option value="AC 110V">AC 110V</option>
+          <option value="AC 220V">AC 220V</option>
+          <option value="DC 24V">DC 24V</option>
+          <option value="不確定，需要協助判斷">不確定，需要協助判斷</option>
+        </select>
+      </div>
+
+      <div class="input-group">
+        <label class="input-label required">C3. 端子台接線順序</label>
+        <div class="input-hint">請描述每支腳從左到右接什麼線，或拍一張帶線照片另外傳</div>
+        <textarea id="c3" placeholder="例：左1=AC110V電源、左2=COM、左3=第1段輸出...&#10;或輸入「另外傳照片」"></textarea>
+      </div>
+
+      <div class="input-group">
+        <label class="input-label required">C4. 三段投切方式</label>
+        <select id="c4">
+          <option value="">請選擇</option>
+          <option value="順序投切（1→2→3 投入，3→2→1 切離）">順序投切（1→2→3 投入，3→2→1 切離）</option>
+          <option value="獨立控制（任意組合）">獨立控制（任意組合）</option>
+          <option value="不確定，依原板行為">不確定，依原板行為</option>
+        </select>
+      </div>
+
+      <div class="input-group">
+        <label class="input-label">C5. 有沒有「全切」需求？</label>
+        <select id="c5">
+          <option value="不需要">不需要</option>
+          <option value="需要（緊急停止，一鍵全部切離）">需要（緊急停止，一鍵全部切離）</option>
+          <option value="不確定">不確定</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">實體 / 數量</div>
+
+      <div class="input-group">
+        <label class="input-label required">C6. 可提供幾片原板？</label>
+        <select id="c6">
+          <option value="">請選擇</option>
+          <option value="可提供 1 片（不可破壞）">可提供 1 片（不可破壞）</option>
+          <option value="可提供 1 片（可拆解）">可提供 1 片（可拆解）</option>
+          <option value="可提供 2 片以上">可提供 2 片以上</option>
+          <option value="沒有原板，只有照片">沒有原板，只有照片</option>
+        </select>
+      </div>
+
+      <div class="input-group">
+        <label class="input-label">C7. 外殼處理方式</label>
+        <select id="c7">
+          <option value="沿用舊外殼">沿用舊外殼（尺寸孔位必須一致）</option>
+          <option value="需要重做外殼">需要重做外殼</option>
+          <option value="不需要外殼">不需要外殼（裸板交付）</option>
+        </select>
+      </div>
+
+      <div class="input-group">
+        <label class="input-label required">C8. 需要幾片 / 幾組？</label>
+        <input type="text" id="c8" placeholder="例：先打樣 3 片，確認後量產 20 片">
+      </div>
+
+      <div class="input-group">
+        <label class="input-label">C9. 交期需求</label>
+        <select id="c9">
+          <option value="正常排程（4~6 週）">正常排程（4~6 週）</option>
+          <option value="急件（2 週內）">急件（2 週內）</option>
+          <option value="不急，品質優先">不急，品質優先</option>
+        </select>
+      </div>
+
+      <div class="input-group">
+        <label class="input-label">C10. 未來會追加嗎？</label>
+        <input type="text" id="c10" placeholder="例：每年約 50 片 / 不會追加 / 不確定">
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-back" onclick="goStep(1)">上一步</button>
+      <button class="btn btn-primary" onclick="goStep(3)">下一步</button>
+    </div>
+  </div>
+
+  <!-- ============ STEP 3: 條件問題 ============ -->
+  <div class="step" id="step3">
+    <div class="step-indicator">第 3 步 / 共 4 步 — 進階規格（依您選的範圍）</div>
+
+    <!-- B: 控制箱 -->
+    <div id="section_B" style="display:none">
+      <div class="card">
+        <div class="card-title">控制箱規格</div>
+        <div class="card-subtitle">因為您選了「PCB + 控制箱整組」</div>
+
+        <div class="input-group">
+          <label class="input-label required">B1. 幾相電？電壓等級？</label>
+          <select id="b1">
+            <option value="">請選擇</option>
+            <option value="三相 220V">三相 220V</option>
+            <option value="三相 380V">三相 380V</option>
+            <option value="單相 220V">單相 220V</option>
+            <option value="其他">其他（請在備註說明）</option>
+          </select>
+        </div>
+
+        <div class="input-group">
+          <label class="input-label required">B2. 電容器規格</label>
+          <textarea id="b2" placeholder="例：FUSI-PAC P-20-220, 20kVAR, 220V, 共 3 只&#10;或輸入「沿用原有」"></textarea>
+        </div>
+
+        <div class="input-group">
+          <label class="input-label">B3. 接觸器由誰提供？</label>
+          <select id="b3">
+            <option value="由你們採購">由你們採購</option>
+            <option value="我方提供">我方提供</option>
+            <option value="指定品牌，由你們採購">指定品牌（請在備註說明）</option>
+          </select>
+        </div>
+
+        <div class="input-group">
+          <label class="input-label">B4. NFB 斷路器規格</label>
+          <input type="text" id="b4" placeholder="例：30A / 由你們選配 / 沿用原有">
+        </div>
+
+        <div class="input-group">
+          <label class="input-label">B5. 箱體安裝方式</label>
+          <select id="b5">
+            <option value="壁掛">壁掛</option>
+            <option value="落地">落地</option>
+            <option value="嵌入">嵌入</option>
+            <option value="依原箱尺寸">依原箱尺寸</option>
+          </select>
+        </div>
+
+        <div class="input-group">
+          <label class="input-label">B6. 進出線方式</label>
+          <select id="b6">
+            <option value="下進下出">下進下出</option>
+            <option value="上進上出">上進上出</option>
+            <option value="下進上出">下進上出</option>
+            <option value="依原箱配置">依原箱配置</option>
+          </select>
+        </div>
+
+        <div class="input-group">
+          <label class="input-label">B7. 安規認證需求</label>
+          <select id="b7">
+            <option value="不需要">不需要</option>
+            <option value="CE">CE</option>
+            <option value="UL">UL</option>
+            <option value="台灣商檢">台灣商檢</option>
+            <option value="其他">其他（請在備註說明）</option>
+          </select>
+        </div>
+
+        <div class="input-group">
+          <label class="input-label">B8. 箱體絲印標示</label>
+          <select id="b8">
+            <option value="需要（標準標示）">需要（端子標號 + 警告標誌）</option>
+            <option value="需要（含公司 logo）">需要（含公司 logo，另外提供檔案）</option>
+            <option value="不需要">不需要</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- 乙: 韌體 -->
+    <div id="section_F" style="display:none">
+      <div class="card">
+        <div class="card-title">韌體需求</div>
+        <div class="card-subtitle">因為您選了「重新撰寫韌體」</div>
+
+        <div class="input-group">
+          <label class="input-label required">F1. 原板目前的操作行為</label>
+          <div class="input-hint">請盡量描述：上電後怎麼動作？什麼狀況會投入/切離？有沒有指示燈變化？</div>
+          <textarea id="f1" rows="4" placeholder="例：上電後等幾秒，收到信號後第一組先投入，過幾秒第二組跟著投入..."></textarea>
+        </div>
+
+        <div class="input-group">
+          <label class="input-label">F2. 段間投入延時</label>
+          <select id="f2">
+            <option value="依建議（3~5 秒）">依建議（3~5 秒）</option>
+            <option value="需要自訂">需要自訂（請在備註說明）</option>
+            <option value="依原板行為">依原板行為</option>
+          </select>
+        </div>
+
+        <div class="input-group">
+          <label class="input-label">F3. 再投入禁止時間</label>
+          <select id="f3">
+            <option value="依建議（60 秒）">依建議（60 秒）</option>
+            <option value="需要自訂">需要自訂（請在備註說明）</option>
+            <option value="依原板行為">依原板行為</option>
+          </select>
+        </div>
+
+        <div class="input-group">
+          <label class="input-label">F4. 時序參數現場可調嗎？</label>
+          <select id="f4">
+            <option value="固定寫死即可">固定寫死即可</option>
+            <option value="需要現場可調（DIP 開關 / 旋鈕）">需要現場可調（DIP 開關 / 旋鈕）</option>
+          </select>
+        </div>
+
+        <div class="input-group">
+          <label class="input-label">F5. 通訊介面需求</label>
+          <select id="f5">
+            <option value="不需要">不需要</option>
+            <option value="RS485 / Modbus">RS485 / Modbus</option>
+            <option value="藍牙">藍牙</option>
+            <option value="其他">其他（請在備註說明）</option>
+          </select>
+        </div>
+
+        <div class="input-group">
+          <label class="input-label">F6. 故障記錄 / 報警輸出</label>
+          <select id="f6">
+            <option value="不需要">不需要</option>
+            <option value="需要報警乾接點輸出">需要報警乾接點輸出</option>
+            <option value="需要故障記錄">需要故障記錄（斷電不遺失）</option>
+            <option value="都需要">都需要</option>
+          </select>
+        </div>
+
+        <div class="input-group">
+          <label class="input-label">F7. 需要顯示介面嗎？</label>
+          <select id="f7">
+            <option value="不需要，LED 指示即可">不需要，LED 指示即可</option>
+            <option value="需要數碼管顯示">需要數碼管顯示</option>
+            <option value="需要 LCD 螢幕">需要 LCD 螢幕</option>
+          </select>
+        </div>
+
+        <div class="input-group">
+          <label class="input-label">F8. 韌體原始碼交付</label>
+          <select id="f8">
+            <option value="只要燒錄好的成品">只要燒錄好的成品</option>
+            <option value="需要原始碼">需要原始碼（含完整註解）</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- II: 偵測 -->
+    <div id="section_D" style="display:none">
+      <div class="card">
+        <div class="card-title">電流偵測規格</div>
+        <div class="card-subtitle">因為您選了「板端自行偵測電流」</div>
+
+        <div class="warn-box">
+          ⚠️ 此方案等於將功因控制器整合到板上，開發時間與成本會明顯增加，我們會另外評估報價。
+        </div>
+
+        <div class="input-group">
+          <label class="input-label required">D1. 量測幾相電流？</label>
+          <select id="d1">
+            <option value="">請選擇</option>
+            <option value="單相">單相</option>
+            <option value="兩相">兩相</option>
+            <option value="三相">三相</option>
+          </select>
+        </div>
+
+        <div class="input-group">
+          <label class="input-label">D2. CT 規格（若已有）</label>
+          <input type="text" id="d2" placeholder="例：100A/5A 開口式 / 還沒選，需要建議">
+        </div>
+
+        <div class="input-group">
+          <label class="input-label required">D3. 現場最大負載電流（安培）</label>
+          <input type="text" id="d3" placeholder="例：150A / 不確定">
+        </div>
+
+        <div class="input-group">
+          <label class="input-label">D4. 需要同時量測電壓嗎？</label>
+          <div class="input-hint">計算真實功率因數需要電壓波形，只量電流只能估算</div>
+          <select id="d4">
+            <option value="需要（計算真實功率因數）">需要（計算真實功率因數）</option>
+            <option value="不需要（估算即可）">不需要（估算即可）</option>
+            <option value="不確定，依你們建議">不確定，依你們建議</option>
+          </select>
+        </div>
+
+        <div class="input-group">
+          <label class="input-label">D5. 目標功率因數</label>
+          <select id="d5">
+            <option value="0.95 以上">0.95 以上</option>
+            <option value="0.97 以上">0.97 以上</option>
+            <option value="0.99 以上">0.99 以上</option>
+            <option value="依你們建議">依你們建議</option>
+          </select>
+        </div>
+
+        <div class="input-group">
+          <label class="input-label">D6. 投切遲滯區間</label>
+          <div class="input-hint">避免頻繁投切，例：PF &lt; 0.92 投入，PF &gt; 0.98 切離</div>
+          <select id="d6">
+            <option value="依你們建議">依你們建議</option>
+            <option value="需要自訂">需要自訂（請在備註說明）</option>
+          </select>
+        </div>
+
+        <div class="input-group">
+          <label class="input-label">D7. 判斷取樣週期</label>
+          <select id="d7">
+            <option value="依你們建議（5~10 週期）">依你們建議（5~10 個電力週期）</option>
+            <option value="需要自訂">需要自訂（請在備註說明）</option>
+          </select>
+        </div>
+
+        <div class="input-group">
+          <label class="input-label">D8. 現場有特殊負載嗎？</label>
+          <div class="input-hint">大馬達、變頻器、電焊機等會影響偵測精度</div>
+          <textarea id="d8" placeholder="例：有 2 台 30HP 空壓機、1 台電焊機&#10;或輸入「沒有」"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- 無條件問題時的提示 -->
+    <div id="section_none" style="display:none">
+      <div class="card">
+        <div class="info-box">
+          ✅ 您選擇的方案不需要額外填寫進階規格，請直接進入下一步。
+        </div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-back" onclick="goStep(2)">上一步</button>
+      <button class="btn btn-primary" onclick="goStep(4)">下一步</button>
+    </div>
+  </div>
+
+  <!-- ============ STEP 4: 備註 + 提交 ============ -->
+  <div class="step" id="step4">
+    <div class="step-indicator">第 4 步 / 共 4 步 — 最後確認</div>
+
+    <div class="card">
+      <div class="card-title">補充說明</div>
+
+      <div class="input-group">
+        <label class="input-label">聯絡人 / 公司名稱</label>
+        <input type="text" id="contact" placeholder="方便我們回覆報價">
+      </div>
+
+      <div class="input-group">
+        <label class="input-label">備註（任何補充）</label>
+        <textarea id="notes" rows="4" placeholder="其他需求、特殊要求、想問的問題..."></textarea>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">確認送出</div>
+      <div class="card-subtitle">點擊下方按鈕產生結果，可透過 LINE 直接傳送</div>
+
+      <div id="resultArea" style="display:none">
+        <div class="result-box" id="resultText"></div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-back" onclick="goStep(3)">上一步</button>
+        <button class="btn btn-primary" onclick="generateResult()">產生結果</button>
+      </div>
+
+      <div id="sendBtns" style="display:none; margin-top: 12px;">
+        <div class="btn-row">
+          <button class="btn btn-line" onclick="sendToLine()">📤 用 LINE 傳送</button>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-success" onclick="copyResult()">📋 複製到剪貼簿</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== State =====
+const answers = {};
+
+function selectOption(btn) {
+  const group = btn.parentElement;
+  group.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  const groupId = group.id;
+  answers[groupId] = btn.dataset.value;
+}
+
+function goStep(n) {
+  // Validation for step 1
+  if (n === 2) {
+    if (!answers.q_hardware || !answers.q_firmware || !answers.q_detect) {
+      showToast('請先完成三個範圍選擇');
+      return;
+    }
+  }
+
+  // Validation for step 2
+  if (n === 3 && document.getElementById('step2').classList.contains('active')) {
+    const required2 = ['c1','c2','c3','c4','c6','c8'];
+    for (const id of required2) {
+      const el = document.getElementById(id);
+      if (!el.value.trim()) {
+        showToast('請填寫所有必填欄位（標示 * 的項目）');
+        el.focus();
+        return;
+      }
+    }
+  }
+
+  // Show/hide conditional sections in step 3
+  if (n === 3) {
+    const showB = answers.q_hardware === 'B';
+    const showF = answers.q_firmware === '乙';
+    const showD = answers.q_detect === 'II';
+    document.getElementById('section_B').style.display = showB ? 'block' : 'none';
+    document.getElementById('section_F').style.display = showF ? 'block' : 'none';
+    document.getElementById('section_D').style.display = showD ? 'block' : 'none';
+    document.getElementById('section_none').style.display = (!showB && !showF && !showD) ? 'block' : 'none';
+  }
+
+  // Switch steps
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  document.getElementById('step' + n).classList.add('active');
+
+  // Update progress
+  const pct = ((n - 1) / 3 * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function val(id) {
+  const el = document.getElementById(id);
+  return el ? el.value.trim() : '';
+}
+
+function generateResult() {
+  const hw = answers.q_hardware === 'A' ? 'A. 只做 PCB 板' : 'B. PCB 板 + 控制箱整組';
+  const fw = answers.q_firmware === '甲' ? '甲. 沿用原板程式' : '乙. 重新撰寫韌體';
+  const dt = answers.q_detect === 'I' ? 'I. 外部信號輸入' : 'II. 板端自行偵測電流';
+
+  let text = '';
+  text += '═══════════════════\n';
+  text += '  PCB控制板 需求確認結果\n';
+  text += '═══════════════════\n\n';
+
+  if (val('contact')) text += '聯絡人：' + val('contact') + '\n\n';
+
+  text += '【範圍】\n';
+  text += '硬體：' + hw + '\n';
+  text += '韌體：' + fw + '\n';
+  text += '偵測：' + dt + '\n\n';
+
+  text += '【基本規格】\n';
+  text += 'C1 控制電源：' + val('c1') + '\n';
+  text += 'C2 接觸器線圈電壓：' + val('c2') + '\n';
+  text += 'C3 端子台接線：' + val('c3') + '\n';
+  text += 'C4 投切方式：' + val('c4') + '\n';
+  text += 'C5 全切需求：' + val('c5') + '\n';
+  text += 'C6 原板提供：' + val('c6') + '\n';
+  text += 'C7 外殼：' + val('c7') + '\n';
+  text += 'C8 數量：' + val('c8') + '\n';
+  text += 'C9 交期：' + val('c9') + '\n';
+  text += 'C10 未來追加：' + (val('c10') || '未填') + '\n';
+
+  if (answers.q_hardware === 'B') {
+    text += '\n【控制箱規格】\n';
+    text += 'B1 電力規格：' + val('b1') + '\n';
+    text += 'B2 電容器：' + val('b2') + '\n';
+    text += 'B3 接觸器：' + val('b3') + '\n';
+    text += 'B4 NFB：' + (val('b4') || '未填') + '\n';
+    text += 'B5 安裝方式：' + val('b5') + '\n';
+    text += 'B6 進出線：' + val('b6') + '\n';
+    text += 'B7 安規：' + val('b7') + '\n';
+    text += 'B8 絲印：' + val('b8') + '\n';
+  }
+
+  if (answers.q_firmware === '乙') {
+    text += '\n【韌體需求】\n';
+    text += 'F1 原板行為：' + (val('f1') || '未填') + '\n';
+    text += 'F2 段間延時：' + val('f2') + '\n';
+    text += 'F3 再投入禁止：' + val('f3') + '\n';
+    text += 'F4 參數可調：' + val('f4') + '\n';
+    text += 'F5 通訊介面：' + val('f5') + '\n';
+    text += 'F6 故障/報警：' + val('f6') + '\n';
+    text += 'F7 顯示介面：' + val('f7') + '\n';
+    text += 'F8 原始碼交付：' + val('f8') + '\n';
+  }
+
+  if (answers.q_detect === 'II') {
+    text += '\n【電流偵測規格】\n';
+    text += 'D1 量測相數：' + val('d1') + '\n';
+    text += 'D2 CT規格：' + (val('d2') || '未填') + '\n';
+    text += 'D3 最大負載電流：' + val('d3') + '\n';
+    text += 'D4 量測電壓：' + val('d4') + '\n';
+    text += 'D5 目標PF：' + val('d5') + '\n';
+    text += 'D6 遲滯區間：' + val('d6') + '\n';
+    text += 'D7 取樣週期：' + val('d7') + '\n';
+    text += 'D8 特殊負載：' + (val('d8') || '未填') + '\n';
+  }
+
+  if (val('notes')) {
+    text += '\n【備註】\n' + val('notes') + '\n';
+  }
+
+  text += '\n═══════════════════';
+
+  document.getElementById('resultText').textContent = text;
+  document.getElementById('resultArea').style.display = 'block';
+  document.getElementById('sendBtns').style.display = 'block';
+
+  document.getElementById('progressFill').style.width = '100%';
+}
+
+function sendToLine() {
+  const text = document.getElementById('resultText').textContent;
+  const encoded = encodeURIComponent(text);
+
+  const ua = navigator.userAgent || '';
+  const isIOS = /iPad|iPhone|iPod/.test(ua);
+  const isAndroid = /Android/.test(ua);
+  const isLINEBrowser = /Line\//i.test(ua);
+
+  if (isLINEBrowser || isIOS || isAndroid) {
+    // 手機：用 line:// scheme 直接開啟 LINE 選擇聯絡人傳送
+    window.location.href = 'line://msg/text/' + encoded;
+    // 如果 LINE 沒裝，3 秒後 fallback 複製
+    setTimeout(() => {
+      copyResult();
+      showToast('如未開啟 LINE，文字已複製，請手動貼上');
+    }, 3000);
+  } else {
+    // 桌面：直接複製
+    copyResult();
+    showToast('文字已複製，請貼到 LINE 電腦版');
+  }
+}
+
+function copyResult() {
+  const text = document.getElementById('resultText').textContent;
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(() => {
+      showToast('已複製！可直接貼到 LINE 對話');
+    });
+  } else {
+    // Fallback
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    showToast('已複製！可直接貼到 LINE 對話');
+  }
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+</script>
+
+</body>
+</html>

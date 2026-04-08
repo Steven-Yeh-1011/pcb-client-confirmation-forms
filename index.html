@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>控制板專案 — 客戶需求確認</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft JhengHei", sans-serif;
+      min-height: 100vh;
+      background: linear-gradient(160deg, #0f172a 0%, #1e3a5f 45%, #2563eb 100%);
+      color: #f8fafc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .wrap { max-width: 420px; width: 100%; text-align: center; }
+    h1 { font-size: 1.35rem; font-weight: 700; line-height: 1.35; margin-bottom: 8px; }
+    p.sub { font-size: 0.9rem; opacity: 0.85; margin-bottom: 28px; line-height: 1.5; }
+    .cards { display: flex; flex-direction: column; gap: 14px; }
+    a.card {
+      display: block;
+      text-decoration: none;
+      color: inherit;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 14px;
+      padding: 20px 22px;
+      text-align: left;
+      transition: background 0.2s, transform 0.15s;
+    }
+    a.card:hover { background: rgba(255,255,255,0.18); transform: translateY(-2px); }
+    a.card strong { display: block; font-size: 1.05rem; margin-bottom: 6px; }
+    a.card span { font-size: 0.82rem; opacity: 0.88; line-height: 1.45; }
+    .badge { display: inline-block; font-size: 0.7rem; font-weight: 600; padding: 3px 8px; border-radius: 6px; margin-bottom: 8px; }
+    .badge.full { background: #dbeafe; color: #1e40af; }
+    .badge.simple { background: #dcfce7; color: #166534; }
+    footer { margin-top: 28px; font-size: 0.75rem; opacity: 0.65; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>控制板專案 — 需求確認</h1>
+    <p class="sub">請依需求選擇表單版本填寫。建議多數客戶先使用簡易版；細節較多時請用完整版。</p>
+    <div class="cards">
+      <a class="card" href="./form-simple.html">
+        <span class="badge simple">簡易版</span>
+        <strong>客戶端確認表單（簡易版）</strong>
+        <span>步驟較少、填寫較快，適合先釐清大方向。</span>
+      </a>
+      <a class="card" href="./form-full.html">
+        <span class="badge full">完整版</span>
+        <strong>客戶端確認表單（完整版）</strong>
+        <span>含較多技術與規格欄位，適合已明確規格或需逐項確認時使用。</span>
+      </a>
+    </div>
+    <footer>若連結無法開啟，請確認網址是否完整複製。</footer>
+  </div>
+</body>
+</html>
